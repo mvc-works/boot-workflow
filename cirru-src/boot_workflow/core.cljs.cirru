@@ -19,8 +19,8 @@ defn render-element ()
   render-app ([] container-component @global-store)
     , @global-states
 
-defn intent (op op-data)
-  .log js/console |intent: op op-data
+defn dispatch (op op-data)
+  .log js/console |dispatch: op op-data
 
 defn get-root ()
   .querySelector js/document |#app
@@ -28,7 +28,7 @@ defn get-root ()
 declare rerender-app
 
 defn get-deliver-event ()
-  build-deliver-event global-element intent global-states
+  build-deliver-event global-element dispatch global-states
 
 defn mount-app ()
   let

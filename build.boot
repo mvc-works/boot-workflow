@@ -5,21 +5,23 @@
  :resource-paths #{"src"}
 
  :dev-dependencies '[]
- :dependencies '[[adzerk/boot-cljs          "1.7.170-3"   :scope "provided"]
-                 [adzerk/boot-reload        "0.4.6"       :scope "provided"]
-                 [mvc-works/boot-html-entry "0.1.1"       :scope "provided"]
-                 [cirru/boot-cirru-sepal    "0.1.1"       :scope "provided"]
+ :dependencies '[[org.clojure/clojurescript "1.8.40"      :scope "test"]
                  [org.clojure/clojure       "1.8.0"       :scope "test"]
-                 [org.clojure/clojurescript "1.7.228"     :scope "test"]
+                 [adzerk/boot-cljs          "1.7.170-3"   :scope "test"]
+                 [adzerk/boot-reload        "0.4.6"       :scope "test"]
+                 [mvc-works/boot-html-entry "0.1.1"       :scope "test"]
+                 [cirru/boot-cirru-sepal    "0.1.1"       :scope "test"]
                  [binaryage/devtools        "0.5.2"       :scope "test"]
                  [mvc-works/hsl             "0.1.2"]
                  [mvc-works/respo           "0.1.9"]
-                 [mvc-works/respo-client    "0.1.8"]])
+                 [mvc-works/respo-client    "0.1.8"]]
 
-(require '[adzerk.boot-cljs :refer [cljs]]
+  :repositories #(conj % ["clojars" {:url "https://clojars.org/repo/"}]))
+
+(require '[adzerk.boot-cljs   :refer [cljs]]
          '[adzerk.boot-reload :refer [reload]]
-         '[html-entry.core :refer [html-entry]]
-         '[cirru-sepal.core :refer [cirru-sepal]])
+         '[html-entry.core    :refer [html-entry]]
+         '[cirru-sepal.core   :refer [cirru-sepal]])
 
 (def +version+ "0.1.0")
 
@@ -31,7 +33,6 @@
        :scm         {:url "https://github.com/mvc-works/boot-workflow"}
        :license     {"MIT" "http://opensource.org/licenses/mit-license.php"}})
 
-(set-env! :repositories #(conj % ["clojars" {:url "https://clojars.org/repo/"}]))
 
 (defn html-dsl [data]
   [:html
@@ -45,9 +46,7 @@
     [:style
      nil
      "body * {box-sizing: border-box; }"]]
-    [:script (if (= :build (:env data))
-        "window._appConfig = {env: 'build'}"
-        "window._appConfig = {env: 'dev'}")]
+    [:script {:id "config"  :type "text/edn"} (pr-str data)]
    [:body [:div#app] [:script {:src "main.js"}]]])
 
 (deftask compile-cirru []
@@ -56,21 +55,26 @@
 (deftask dev []
   (comp
     (html-entry :dsl (html-dsl {:env :dev}) :html-name "index.html")
-    (cirru-sepal :paths ["cirru-src"])
+    (compile-cirru)
     (cirru-sepal :paths ["cirru-src"] :watch true)
     (watch)
     (reload :on-jsload 'boot-workflow.core/on-jsload)
-    (cljs)))
+    (cljs)
+    (target)))
 
 (deftask build-simple []
   (comp
+    (compile-cirru)
     (cljs)
-    (html-entry :dsl (html-dsl {:env :dev}) :html-name "index.html")))
+    (html-entry :dsl (html-dsl {:env :build}) :html-name "index.html")
+    (target)))
 
 (deftask build-advanced []
   (comp
+    (compile-cirru)
     (cljs :optimizations :advanced)
-    (html-entry :dsl (html-dsl {:env :build}) :html-name "index.html")))
+    (html-entry :dsl (html-dsl {:env :build}) :html-name "index.html")
+    (target)))
 
 (deftask rsync []
   (fn [next-task]
@@ -80,16 +84,17 @@
 
 (deftask send-tiye []
   (comp
-    (build-advanced)
+    (build-simple)
     (rsync)))
 
 (deftask build []
   (comp
-   (pom)
-   (jar)
-   (install)))
+    (compile-cirru)
+    (pom)
+    (jar)
+    (install)))
 
 (deftask deploy []
   (comp
-   (build)
-   (push :repo "clojars" :gpg-sign (not (.endsWith +version+ "-SNAPSHOT")))))
+    (build)
+    (push :repo "clojars" :gpg-sign (not (.endsWith +version+ "-SNAPSHOT")))))
