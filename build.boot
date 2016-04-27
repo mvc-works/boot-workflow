@@ -14,7 +14,7 @@
                  [binaryage/devtools        "0.5.2"       :scope "test"]
                  [mvc-works/hsl             "0.1.2"]
                  [mvc-works/respo           "0.1.9"]
-                 [mvc-works/respo-client    "0.1.8"]]
+                 [mvc-works/respo-client    "0.1.9"]]
 
   :repositories #(conj % ["clojars" {:url "https://clojars.org/repo/"}]))
 
@@ -65,7 +65,7 @@
 (deftask build-simple []
   (comp
     (compile-cirru)
-    (cljs)
+    (cljs :optimizations :simple)
     (html-entry :dsl (html-dsl {:env :build}) :html-name "index.html")
     (target)))
 
@@ -92,7 +92,8 @@
     (compile-cirru)
     (pom)
     (jar)
-    (install)))
+    (install)
+    (target)))
 
 (deftask deploy []
   (comp
