@@ -1,69 +1,29 @@
 
 ns boot-workflow.core $ :require
-  [] hsl.core :refer $ [] hsl
-  [] respo.renderer.expander :refer $ [] render-app
-  [] respo.controller.deliver :refer $ [] build-deliver-event mutate-factory
-  [] respo.renderer.differ :refer $ [] find-element-diffs
-  [] respo.util.format :refer $ [] purify-element
-  [] respo-client.controller.client :refer $ [] initialize-instance activate-instance patch-instance
-  [] boot-workflow.component.container :refer $ [] component-container
-  [] devtools.core :as devtools
+  [] respo-spa.core :refer $ [] render
+  [] boot-workflow.component.container :refer $ [] comp-container
 
-defonce global-store $ atom nil
+defonce store-ref $ atom 0
 
-defonce global-states $ atom ({})
+defonce states-ref $ atom ({})
 
-defonce global-element $ atom nil
+defn dispatch $ op op-data
 
-defn render-element ()
+defn render-app ()
   let
-    (build-mutate $ mutate-factory global-element global-states)
-    render-app (component-container @global-store)
-      , @global-states build-mutate
-
-defn dispatch (op op-data)
-  .log js/console |dispatch: op op-data
-
-defn get-root ()
-  .querySelector js/document |#app
-
-defn mount-app ()
-  let
-    (element $ render-element)
-      deliver-event $ build-deliver-event global-element dispatch
-    initialize-instance (get-root)
-      , deliver-event
-    .log js/console |element: element
-    activate-instance (purify-element element)
-      get-root
-      , deliver-event
-    reset! global-element element
-
-defn rerender-app ()
-  let
-    (element $ render-element)
-      deliver-event $ build-deliver-event global-element dispatch
-      changes $ find-element-diffs ([])
-        []
-        purify-element @global-element
-        purify-element element
-
-    .info js.console |Changes: changes
-    patch-instance changes (get-root)
-      , deliver-event
-    reset! global-element element
+    (target $ .querySelector js/document |#app)
+    render (comp-container @store-ref)
+      , target dispatch states-ref
 
 defn -main ()
-  devtools/enable-feature! :sanity-hints :dirac
-  devtools/install!
-  println |Loaded
-  mount-app
-  add-watch global-store :rerender rerender-app
-  add-watch global-states :rerender rerender-app
+  enable-console-print!
+  render-app
+  add-watch store-ref :changes render-app
+  add-watch states-ref :changes render-app
+  println "|app started!"
+
+set! js/window.onload -main
 
 defn on-jsload ()
-  println |Reload
-  rerender-app
-
-set! (.-onload js/window)
-  , -main
+  render-app
+  println "|code updated."

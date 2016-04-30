@@ -6,12 +6,6 @@ Personal project template based on Respo, Boot, ClojureScript, Cirru Sepal...
 
 ### Develop
 
-Compile Cirru code into ClojureScript:
-
-```bash
-boot compile-cirru
-```
-
 Genetate HTML(`target/index.html`), watch and build ClojureScript:
 
 ```bash
@@ -40,6 +34,12 @@ Package jar file and send to Clojars:
 
 ```bash
 boot deploy
+```
+
+Get ClojureScript code:
+
+```bash
+boot compile-cirru
 ```
 
 ### License

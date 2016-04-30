@@ -8,4 +8,4 @@ defn render (store)
     div ({})
       span $ {} :attrs ({} :inner-text |Container)
 
-def component-container $ create-comp :container render
+def comp-container $ create-comp :container render

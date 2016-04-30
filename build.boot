@@ -1,21 +1,16 @@
 
 (set-env!
- :asset-paths #{"assets"}
- :source-paths #{"cirru-src"}
- :resource-paths #{}
-
- :dev-dependencies '[]
  :dependencies '[[org.clojure/clojurescript "1.8.40"      :scope "test"]
                  [org.clojure/clojure       "1.8.0"       :scope "test"]
                  [adzerk/boot-cljs          "1.7.170-3"   :scope "test"]
                  [adzerk/boot-reload        "0.4.6"       :scope "test"]
                  [cirru/boot-cirru-sepal    "0.1.5"       :scope "test"]
                  [binaryage/devtools        "0.5.2"       :scope "test"]
-                 [mrmcc3/boot-rev   "0.1.0-SNAPSHOT"  :scope "test"]
+                 [hiccup                    "1.0.5"       :scope "test"]
+                 [mrmcc3/boot-rev           "0.1.0"       :scope "test"]
                  [mvc-works/hsl             "0.1.2"]
-                 [mvc-works/respo           "0.1.18"]
-                 [mvc-works/respo-client    "0.1.11"]
-                 [hiccup                    "1.0.5"]]
+                 [mvc-works/respo           "0.1.19"]
+                 [mvc-works/respo-spa       "0.1.3"]]
 
   :repositories #(conj % ["clojars" {:url "https://clojars.org/repo/"}]))
 
@@ -37,6 +32,8 @@
        :license     {"MIT" "http://opensource.org/licenses/mit-license.php"}})
 
 (deftask compile-cirru []
+  (set-env!
+    :source-paths #{"cirru-src"})
   (cirru-sepal :paths ["cirru-src"]))
 
 (defn html-dsl [data fileset]
@@ -44,9 +41,9 @@
    [:head
     [:title "Boot workflow"]
     [:link
-     {:rel "icon", :type "image/png", :href "respo.png"}]
+     {:rel "icon", :type "image/png", :href "http://logo.cirru.org/cirru-400x400.png"}]
     [:style nil "body {margin: 0;}"]
-    [:style nil "body * {box-sizing: border-box; }"]]
+    [:style nil "body * {box-sizing: border-box;}"]]
     [:script {:id "config"  :type "text/edn"} (pr-str data)]
    [:body [:div#app] [:script {:src
     (let [script-name "main.js"]
@@ -67,6 +64,8 @@
         (commit!)))))
 
 (deftask dev []
+  (set-env!
+    :source-paths #{"cirru-src"})
   (comp
     (html-file :data {:build? false})
     (watch)
@@ -76,6 +75,8 @@
     (target)))
 
 (deftask build-simple []
+  (set-env!
+    :source-paths #{"cirru-src"})
   (comp
     (transform-cirru)
     (cljs :optimizations :simple)
@@ -83,6 +84,8 @@
     (target)))
 
 (deftask build-advanced []
+  (set-env!
+    :source-paths #{"cirru-src"})
   (comp
     (transform-cirru)
     (cljs :optimizations :advanced)
@@ -102,9 +105,10 @@
     (rsync)))
 
 (deftask build []
-  (set-env! :resource-paths #{"src/"})
+  (set-env!
+    :source-paths #{"cirru-src"})
   (comp
-    (compile-cirru)
+    (transform-cirru)
     (pom)
     (jar)
     (install)
