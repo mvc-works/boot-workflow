@@ -9,19 +9,22 @@
                  [org.clojure/clojure       "1.8.0"       :scope "test"]
                  [adzerk/boot-cljs          "1.7.170-3"   :scope "test"]
                  [adzerk/boot-reload        "0.4.6"       :scope "test"]
-                 [mvc-works/boot-html-entry "0.1.1"       :scope "test"]
                  [cirru/boot-cirru-sepal    "0.1.1"       :scope "test"]
                  [binaryage/devtools        "0.5.2"       :scope "test"]
+                 [mrmcc3/boot-rev   "0.1.0-SNAPSHOT"  :scope "test"]
                  [mvc-works/hsl             "0.1.2"]
                  [mvc-works/respo           "0.1.9"]
-                 [mvc-works/respo-client    "0.1.9"]]
+                 [mvc-works/respo-client    "0.1.9"]
+                 [hiccup                    "1.0.5"]]
 
   :repositories #(conj % ["clojars" {:url "https://clojars.org/repo/"}]))
 
 (require '[adzerk.boot-cljs   :refer [cljs]]
          '[adzerk.boot-reload :refer [reload]]
-         '[html-entry.core    :refer [html-entry]]
-         '[cirru-sepal.core   :refer [cirru-sepal]])
+         '[cirru-sepal.core   :refer [cirru-sepal]]
+         '[mrmcc3.boot-rev    :refer [rev rev-path]]
+         '[clojure.java.io    :as    io]
+         '[hiccup.core :refer [html]])
 
 (def +version+ "0.1.0")
 
@@ -33,28 +36,39 @@
        :scm         {:url "https://github.com/mvc-works/boot-workflow"}
        :license     {"MIT" "http://opensource.org/licenses/mit-license.php"}})
 
+(deftask compile-cirru []
+  (cirru-sepal :paths ["cirru-src"]))
 
-(defn html-dsl [data]
+(defn html-dsl [data fileset]
   [:html
    [:head
     [:title "Boot workflow"]
     [:link
-     {:rel "stylesheet", :type "text/css", :href "style.css"}]
-    [:link
      {:rel "icon", :type "image/png", :href "respo.png"}]
     [:style nil "body {margin: 0;}"]
-    [:style
-     nil
-     "body * {box-sizing: border-box; }"]]
+    [:style nil "body * {box-sizing: border-box; }"]]
     [:script {:id "config"  :type "text/edn"} (pr-str data)]
-   [:body [:div#app] [:script {:src "main.js"}]]])
+   [:body [:div#app] [:script {:src
+    (let [script-name "main.js"]
+      (if (:build? data)
+        (rev-path fileset script-name)
+        script-name))}]]])
 
-(deftask compile-cirru []
-  (cirru-sepal :paths ["cirru-src"]))
+(deftask html-file
+  "task to generate HTML file"
+  [d data VAL edn "data piece for rendering"]
+  (with-pre-wrap fileset
+    (let [tmp (tmp-dir!)
+          out (io/file tmp "index.html")]
+      (empty-dir! tmp)
+      (spit out (html (html-dsl data fileset)))
+      (-> fileset
+        (add-resource tmp)
+        (commit!)))))
 
 (deftask dev []
   (comp
-    (html-entry :dsl (html-dsl {:env :dev}) :html-name "index.html")
+    (html-file :data {:build? false})
     (compile-cirru)
     (cirru-sepal :paths ["cirru-src"] :watch true)
     (watch)
@@ -66,14 +80,15 @@
   (comp
     (compile-cirru)
     (cljs :optimizations :simple)
-    (html-entry :dsl (html-dsl {:env :build}) :html-name "index.html")
+    (html-file :data {:build? false})
     (target)))
 
 (deftask build-advanced []
   (comp
     (compile-cirru)
     (cljs :optimizations :advanced)
-    (html-entry :dsl (html-dsl {:env :build}) :html-name "index.html")
+    (rev :files [#"^[\w\.]+\.js$"])
+    (html-file :data {:build? true})
     (target)))
 
 (deftask rsync []

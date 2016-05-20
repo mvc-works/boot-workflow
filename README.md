@@ -24,7 +24,7 @@ Generate HTML, compile ClojureSript:
 boot build-simple
 ```
 
-Generate HTML, compile and optimize ClojureScript:
+Compile and optimize ClojureScript, generate HTML with revision:
 
 ```bash
 boot build-advanced
