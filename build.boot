@@ -1,15 +1,15 @@
 
 (set-env!
  :asset-paths #{"assets"}
- :source-paths #{}
- :resource-paths #{"src"}
+ :source-paths #{"cirru-src"}
+ :resource-paths #{}
 
  :dev-dependencies '[]
  :dependencies '[[org.clojure/clojurescript "1.8.40"      :scope "test"]
                  [org.clojure/clojure       "1.8.0"       :scope "test"]
                  [adzerk/boot-cljs          "1.7.170-3"   :scope "test"]
                  [adzerk/boot-reload        "0.4.6"       :scope "test"]
-                 [cirru/boot-cirru-sepal    "0.1.1"       :scope "test"]
+                 [cirru/boot-cirru-sepal    "0.1.5"       :scope "test"]
                  [binaryage/devtools        "0.5.2"       :scope "test"]
                  [mrmcc3/boot-rev   "0.1.0-SNAPSHOT"  :scope "test"]
                  [mvc-works/hsl             "0.1.2"]
@@ -21,7 +21,7 @@
 
 (require '[adzerk.boot-cljs   :refer [cljs]]
          '[adzerk.boot-reload :refer [reload]]
-         '[cirru-sepal.core   :refer [cirru-sepal]]
+         '[cirru-sepal.core   :refer [cirru-sepal transform-cirru]]
          '[mrmcc3.boot-rev    :refer [rev rev-path]]
          '[clojure.java.io    :as    io]
          '[hiccup.core :refer [html]])
@@ -69,23 +69,22 @@
 (deftask dev []
   (comp
     (html-file :data {:build? false})
-    (compile-cirru)
-    (cirru-sepal :paths ["cirru-src"] :watch true)
     (watch)
+    (transform-cirru)
     (reload :on-jsload 'boot-workflow.core/on-jsload)
     (cljs)
     (target)))
 
 (deftask build-simple []
   (comp
-    (compile-cirru)
+    (transform-cirru)
     (cljs :optimizations :simple)
     (html-file :data {:build? false})
     (target)))
 
 (deftask build-advanced []
   (comp
-    (compile-cirru)
+    (transform-cirru)
     (cljs :optimizations :advanced)
     (rev :files [#"^[\w\.]+\.js$"])
     (html-file :data {:build? true})
@@ -103,6 +102,7 @@
     (rsync)))
 
 (deftask build []
+  (set-env! :resource-paths #{"src/"})
   (comp
     (compile-cirru)
     (pom)
