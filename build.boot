@@ -13,8 +13,8 @@
                  [binaryage/devtools        "0.5.2"       :scope "test"]
                  [mrmcc3/boot-rev   "0.1.0-SNAPSHOT"  :scope "test"]
                  [mvc-works/hsl             "0.1.2"]
-                 [mvc-works/respo           "0.1.9"]
-                 [mvc-works/respo-client    "0.1.9"]
+                 [mvc-works/respo           "0.1.18"]
+                 [mvc-works/respo-client    "0.1.11"]
                  [hiccup                    "1.0.5"]]
 
   :repositories #(conj % ["clojars" {:url "https://clojars.org/repo/"}]))
