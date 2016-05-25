@@ -7,6 +7,7 @@
                  [cirru/boot-cirru-sepal    "0.1.5"       :scope "test"]
                  [binaryage/devtools        "0.5.2"       :scope "test"]
                  [mrmcc3/boot-rev           "0.1.0"       :scope "test"]
+                 [adzerk/boot-test          "1.1.1"       :scope "test"]
                  [mvc-works/hsl             "0.1.2"]
                  [mvc-works/respo           "0.1.22"]
                  [mvc-works/respo-spa       "0.1.3"]]
@@ -19,6 +20,7 @@
          '[respo.alias        :refer [html head title script style meta' div link body]]
          '[respo.render.static-html :refer [make-html]]
          '[mrmcc3.boot-rev    :refer [rev rev-path]]
+         '[adzerk.boot-test   :refer :all]
          '[clojure.java.io    :as    io])
 
 (def +version+ "0.1.0")
@@ -29,7 +31,9 @@
        :description "Workflow"
        :url         "https://github.com/mvc-works/boot-workflow"
        :scm         {:url "https://github.com/mvc-works/boot-workflow"}
-       :license     {"MIT" "http://opensource.org/licenses/mit-license.php"}})
+       :license     {"MIT" "http://opensource.org/licenses/mit-license.php"}}
+
+  test {:namespaces '#{boot-workflow.test}})
 
 (deftask compile-cirru []
   (set-env!
@@ -122,3 +126,11 @@
   (comp
     (build)
     (push :repo "clojars" :gpg-sign (not (.endsWith +version+ "-SNAPSHOT")))))
+
+(deftask watch-test []
+  (set-env!
+    :source-paths #{"cirru-src" "cirru-test"})
+  (comp
+    (watch)
+    (transform-cirru)
+    (test)))
