@@ -16,7 +16,7 @@
 
 (require '[adzerk.boot-cljs   :refer [cljs]]
          '[adzerk.boot-reload :refer [reload]]
-         '[cirru-sepal.core   :refer [cirru-sepal transform-cirru]]
+         '[cirru-sepal.core   :refer [transform-cirru]]
          '[respo.alias        :refer [html head title script style meta' div link body]]
          '[respo.render.static-html :refer [make-html]]
          '[mrmcc3.boot-rev    :refer [rev rev-path]]
@@ -37,8 +37,10 @@
 
 (deftask compile-cirru []
   (set-env!
-    :source-paths #{"cirru-src"})
-  (cirru-sepal :paths ["cirru-src"]))
+    :source-paths #{"cirru/"})
+  (comp
+    (transform-cirru)
+    (target :dir #{"compiled/"})))
 
 (defn use-text [x] {:attrs {:innerHTML x}})
 (defn html-dsl [data fileset]
@@ -73,7 +75,7 @@
 
 (deftask dev []
   (set-env!
-    :source-paths #{"cirru-src"})
+    :source-paths #{"cirru/src"})
   (comp
     (html-file :data {:build? false})
     (watch)
@@ -84,7 +86,7 @@
 
 (deftask build-simple []
   (set-env!
-    :source-paths #{"cirru-src"})
+    :source-paths #{"cirru/src"})
   (comp
     (transform-cirru)
     (cljs :optimizations :simple)
@@ -93,7 +95,7 @@
 
 (deftask build-advanced []
   (set-env!
-    :source-paths #{"cirru-src"})
+    :source-paths #{"cirru/src"})
   (comp
     (transform-cirru)
     (cljs :optimizations :advanced)
@@ -114,7 +116,7 @@
 
 (deftask build []
   (set-env!
-    :source-paths #{"cirru-src"})
+    :source-paths #{"cirru/src"})
   (comp
     (transform-cirru)
     (pom)
@@ -129,7 +131,7 @@
 
 (deftask watch-test []
   (set-env!
-    :source-paths #{"cirru-src" "cirru-test"})
+    :source-paths #{"cirru/src" "cirru/test"})
   (comp
     (watch)
     (transform-cirru)
