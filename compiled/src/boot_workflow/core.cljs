@@ -1,9 +1,10 @@
 
 (ns boot-workflow.core
   (:require [respo-spa.core :refer [render]]
-            [boot-workflow.component.container :refer [comp-container]]))
+            [boot-workflow.component.container :refer [comp-container]]
+            [cljs.reader :refer [read-string]]))
 
-(defonce store-ref (atom 0))
+(defonce store-ref (atom {}))
 
 (defonce states-ref (atom {}))
 
@@ -18,7 +19,16 @@
   (render-app)
   (add-watch store-ref :changes render-app)
   (add-watch states-ref :changes render-app)
-  (println "app started!"))
+  (println "app started!")
+  (let [configEl (.querySelector js/document "#config")
+        config (read-string (.-innerHTML configEl))]
+    (if (and (some? navigator.serviceWorker) (:build? config))
+      (-> navigator.serviceWorker
+       (.register "./sw.js")
+       (.then
+         (fn [registration]
+           (println "resigtered:" registration.scope)))
+       (.catch (fn [error] (println "failed:" error)))))))
 
 (set! js/window.onload -main)
 

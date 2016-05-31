@@ -4,22 +4,17 @@
                  [org.clojure/clojure       "1.8.0"       :scope "test"]
                  [adzerk/boot-cljs          "1.7.170-3"   :scope "test"]
                  [adzerk/boot-reload        "0.4.6"       :scope "test"]
-                 [cirru/boot-cirru-sepal    "0.1.5"       :scope "test"]
-                 [binaryage/devtools        "0.5.2"       :scope "test"]
-                 [mrmcc3/boot-rev           "0.1.0"       :scope "test"]
+                 [cirru/boot-cirru-sepal    "0.1.6"       :scope "test"]
                  [adzerk/boot-test          "1.1.1"       :scope "test"]
                  [mvc-works/hsl             "0.1.2"]
                  [mvc-works/respo           "0.1.22"]
-                 [mvc-works/respo-spa       "0.1.3"]]
-
-  :repositories #(conj % ["clojars" {:url "https://clojars.org/repo/"}]))
+                 [mvc-works/respo-spa       "0.1.3"]])
 
 (require '[adzerk.boot-cljs   :refer [cljs]]
          '[adzerk.boot-reload :refer [reload]]
          '[cirru-sepal.core   :refer [transform-cirru]]
          '[respo.alias        :refer [html head title script style meta' div link body]]
          '[respo.render.static-html :refer [make-html]]
-         '[mrmcc3.boot-rev    :refer [rev rev-path]]
          '[adzerk.boot-test   :refer :all]
          '[clojure.java.io    :as    io])
 
@@ -31,9 +26,7 @@
        :description "Workflow"
        :url         "https://github.com/mvc-works/boot-workflow"
        :scm         {:url "https://github.com/mvc-works/boot-workflow"}
-       :license     {"MIT" "http://opensource.org/licenses/mit-license.php"}}
-
-  test {:namespaces '#{boot-workflow.test}})
+       :license     {"MIT" "http://opensource.org/licenses/mit-license.php"}})
 
 (deftask compile-cirru []
   (set-env!
@@ -45,21 +38,19 @@
 (defn use-text [x] {:attrs {:innerHTML x}})
 (defn html-dsl [data fileset]
   (make-html
-    (let [script-name "main.js"
-          resource-name
-            (if (:build? data)
-              (rev-path fileset script-name)
-              script-name)]
-      (html {}
-      (head {}
-        (title (use-text "Boot Workflow"))
-        (link {:attrs {:rel "icon" :type "image/png" :href "http://logo.cirru.org/cirru-400x400.png"}})
-        (style (use-text "body {margin: 0;}"))
-        (style (use-text "body * {box-sizing: border-box;}"))
-        (script {:attrs {:id "config" :type "text/edn" :innerHTML (pr-str data)}}))
-      (body {}
-        (div {:attrs {:id "app"}})
-        (script {:attrs {:src script-name}}))))))
+    (html {}
+    (head {}
+      (title (use-text "Boot Workflow"))
+      (link {:attrs {:rel "icon" :type "image/png" :href "mvc-works-192x192.png"}})
+      (if (:build? data)
+        (link (:attrs {:rel "manifest" :href "manifest.json"})))
+      (meta'{:attrs {:charset "utf-8"}})
+      (style (use-text "body {margin: 0;}"))
+      (style (use-text "body * {box-sizing: border-box;}"))
+      (script {:attrs {:id "config" :type "text/edn" :innerHTML (pr-str data)}}))
+    (body {}
+      (div {:attrs {:id "app"}})
+      (script {:attrs {:src "main.js"}})))))
 
 (deftask html-file
   "task to generate HTML file"
@@ -75,6 +66,7 @@
 
 (deftask dev []
   (set-env!
+    :asset-paths #{"assets"}
     :source-paths #{"cirru/src"})
   (comp
     (html-file :data {:build? false})
@@ -86,6 +78,7 @@
 
 (deftask build-simple []
   (set-env!
+    :asset-paths #{"assets"}
     :source-paths #{"cirru/src"})
   (comp
     (transform-cirru)
@@ -95,11 +88,11 @@
 
 (deftask build-advanced []
   (set-env!
+    :asset-paths #{"assets"}
     :source-paths #{"cirru/src"})
   (comp
     (transform-cirru)
     (cljs :optimizations :advanced)
-    (rev :files [#"^[\w\.]+\.js$"])
     (html-file :data {:build? true})
     (target)))
 
@@ -125,6 +118,8 @@
     (target)))
 
 (deftask deploy []
+  (set-env!
+    :repositories #(conj % ["clojars" {:url "https://clojars.org/repo/"}]))
   (comp
     (build)
     (push :repo "clojars" :gpg-sign (not (.endsWith +version+ "-SNAPSHOT")))))
@@ -135,4 +130,4 @@
   (comp
     (watch)
     (transform-cirru)
-    (test)))
+    (test :namespaces '#{boot-workflow.test})))
