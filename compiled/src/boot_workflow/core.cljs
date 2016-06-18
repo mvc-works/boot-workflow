@@ -1,6 +1,6 @@
 
 (ns boot-workflow.core
-  (:require [respo-spa.core :refer [render]]
+  (:require [respo.core :refer [render]]
             [boot-workflow.component.container :refer [comp-container]]
             [cljs.reader :refer [read-string]]))
 
