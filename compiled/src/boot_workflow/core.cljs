@@ -1,6 +1,6 @@
 
 (ns boot-workflow.core
-  (:require [respo.core :refer [render]]
+  (:require [respo.core :refer [render!]]
             [boot-workflow.component.container :refer [comp-container]]
             [cljs.reader :refer [read-string]]))
 
@@ -8,17 +8,17 @@
 
 (defonce states-ref (atom {}))
 
-(defn dispatch [op op-data])
+(defn dispatch! [op op-data])
 
-(defn render-app []
+(defn render-app! []
   (let [target (.querySelector js/document "#app")]
-    (render (comp-container @store-ref) target dispatch states-ref)))
+    (render! (comp-container @store-ref) target dispatch! states-ref)))
 
 (defn -main []
   (enable-console-print!)
-  (render-app)
-  (add-watch store-ref :changes render-app)
-  (add-watch states-ref :changes render-app)
+  (render-app!)
+  (add-watch store-ref :changes render-app!)
+  (add-watch states-ref :changes render-app!)
   (println "app started!")
   (let [configEl (.querySelector js/document "#config")
         config (read-string (.-innerHTML configEl))]
@@ -32,4 +32,4 @@
 
 (set! js/window.onload -main)
 
-(defn on-jsload [] (render-app) (println "code updated."))
+(defn on-jsload [] (render-app!) (println "code updated."))
