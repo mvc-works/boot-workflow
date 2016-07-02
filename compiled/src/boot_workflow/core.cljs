@@ -1,6 +1,6 @@
 
 (ns boot-workflow.core
-  (:require [respo.core :refer [render!]]
+  (:require [respo.core :refer [render! clear-cache!]]
             [boot-workflow.component.container :refer [comp-container]]
             [cljs.reader :refer [read-string]]))
 
@@ -32,4 +32,7 @@
 
 (set! js/window.onload -main)
 
-(defn on-jsload [] (render-app!) (println "code updated."))
+(defn on-jsload []
+  (clear-cache!)
+  (render-app!)
+  (println "code updated."))
