@@ -5,9 +5,9 @@
                  [adzerk/boot-cljs          "1.7.228-1"   :scope "test"]
                  [adzerk/boot-reload        "0.4.11"      :scope "test"]
                  [cirru/boot-cirru-sepal    "0.1.9"       :scope "test"]
-                 [adzerk/boot-test          "1.1.1"       :scope "test"]
+                 [adzerk/boot-test          "1.1.2"       :scope "test"]
                  [mvc-works/hsl             "0.1.2"]
-                 [mvc-works/respo           "0.3.7"]])
+                 [respo                     "0.3.8"]])
 
 (require '[adzerk.boot-cljs   :refer [cljs]]
          '[adzerk.boot-reload :refer [reload]]
