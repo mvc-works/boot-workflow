@@ -1,7 +1,7 @@
 
 (ns boot-workflow.core
   (:require [respo.core :refer [render! clear-cache!]]
-            [boot-workflow.component.container :refer [comp-container]]
+            [boot-workflow.comp.container :refer [comp-container]]
             [cljs.reader :refer [read-string]]))
 
 (defonce store-ref (atom {}))

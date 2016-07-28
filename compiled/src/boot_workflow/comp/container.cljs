@@ -1,5 +1,5 @@
 
-(ns boot-workflow.component.container
+(ns boot-workflow.comp.container
   (:require [hsl.core :refer [hsl]]
             [respo.alias :refer [create-comp div span]]))
 

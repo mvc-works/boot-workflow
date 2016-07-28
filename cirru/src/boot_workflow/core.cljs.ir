@@ -1,6 +1,6 @@
 
 [
-[ "ns" "boot-workflow.core" [ ":require" [ "[]" "respo.core" ":refer" [ "[]" "render!" "clear-cache!" ] ] [ "[]" "boot-workflow.component.container" ":refer" [ "[]" "comp-container" ] ] [ "[]" "cljs.reader" ":refer" [ "[]" "read-string" ] ] ] ]
+[ "ns" "boot-workflow.core" [ ":require" [ "[]" "respo.core" ":refer" [ "[]" "render!" "clear-cache!" ] ] [ "[]" "boot-workflow.comp.container" ":refer" [ "[]" "comp-container" ] ] [ "[]" "cljs.reader" ":refer" [ "[]" "read-string" ] ] ] ]
 [ "defonce" "store-ref" [ "atom" [ "{}" ] ] ]
 [ "defonce" "states-ref" [ "atom" [ "{}" ] ] ]
 [ "defn" "dispatch!" [ "op" "op-data" ] ]
