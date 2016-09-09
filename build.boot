@@ -74,7 +74,7 @@
     (transform-cirru)
     (reload :on-jsload 'boot-workflow.core/on-jsload
             :cljs-asset-path ".")
-    (cljs)
+    (cljs :compiler-options {:language-in :ecmascript5})
     (target)))
 
 (deftask build-simple []
@@ -83,7 +83,8 @@
     :source-paths #{"cirru/src"})
   (comp
     (transform-cirru)
-    (cljs :optimizations :simple)
+    (cljs :optimizations :simple
+          :compiler-options {:language-in :ecmascript5})
     (html-file :data {:build? false})
     (target)))
 
